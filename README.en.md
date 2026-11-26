@@ -18,6 +18,10 @@ configuration in place.
 
 ![Probe result: server identity, three tool names, 2129 ms](docs/images/probe.png)
 
+**Add / edit form** — name, transport, command and arguments, environment, working directory and timeouts in one form; `Import JSON` fills it from a pasted snippet, and arguments and environment accept bulk pastes:
+
+![New MCP server form: name, transport, command, arguments, environment, working directory, enabled toggle and three timeouts](docs/images/editor.png)
+
 ## Install
 
 DeepSeek Harness desktop, **Settings → Plugins → Add plugin**, then enter one of:
