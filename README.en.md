@@ -8,6 +8,16 @@ A Settings page that shows every MCP server the current profile runs, updates
 itself as connection state changes, and edits the manager's `servers`
 configuration in place.
 
+## Screens
+
+**Server list** — one row per server with its state, tool count and connect time; Edit / Probe / Restart on the right:
+
+![MCP console list: three connected MCP servers with tool counts and connect times](docs/images/overview.png)
+
+**Probe result** — expanding a row after Probe shows the server identity, advertised tool names and duration:
+
+![Probe result: server identity, three tool names, 2129 ms](docs/images/probe.png)
+
 ## Install
 
 DeepSeek Harness desktop, **Settings → Plugins → Add plugin**, then enter one of:
