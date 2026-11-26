@@ -1,94 +1,108 @@
-# MCP console
+# MCP 控制台 · DeepSeek Harness 插件
 
-A Settings page that shows every MCP server the current profile runs, updates
-itself as connection state changes, and edits the manager's `servers`
-configuration in place.
+[English](README.en.md) | 中文
 
-## Install
+<img src="icon.svg" width="72" align="right" alt="插件图标">
 
-DeepSeek Harness desktop, **Settings → Plugins → Add plugin**, then enter one of:
+在 DeepSeek Harness 的 **设置 → MCP** 里管理本机的 MCP 服务器：实时看状态、逐台探测或重启，并直接增删改服务器配置。
 
-- `github:DongHa0/dsh-mcp` — installs the latest commit of this repository;
-- the absolute path of a checked-out copy of this folder;
-- the absolute path of a packed `.tgz`.
+它本身不是 MCP 服务器，而是宿主 `mcp-manager` 的管理界面。
 
-Refresh the page afterwards, then open **Settings → MCP**. A GitHub install is
-updated by removing and adding it again; an `npm` install gets a version list and
-one-click updates (see [PUBLISH.md](PUBLISH.md)).
+## 功能
 
-## Where it is
+**实时状态** — 每台受管服务器一行：状态点与文案（已连接 / 连接中 / 重连中 / 等待凭据 / 已停用 / 已关闭，以及加载失败、清理失败、重连耗尽等四类失败原因），并显示工具数量与连接时间、当前重试次数与下次重试时间，或最近的诊断文本。
 
-Open **Settings → MCP** (the sidebar's gear icon). The page renders inside the
-settings panel next to Models, Plugins, and Agent presets.
+**探测** — 用一次性实例做连通测试，回显服务器标识、对外声明的工具清单、耗时以及传输是否确认关闭。探测期间现有实例照常运行，已停用的条目也能测。
 
-## What it shows
+**重启** — 销毁现有实例并以新的重连预算重新挂载，用于重连次数耗尽后的恢复。
 
-- One row per managed server, sorted configured before plugin-registered.
-- A state dot and label: connected, connecting, reconnecting, waiting for
-  credentials, disabled, closed, failed (load / cleanup / gave-up /
-  reconnect-disabled / unclosed generation).
-- Supporting detail: tool count and connect time, the current retry attempt and
-  next attempt time, or the last diagnostic text.
-- `Probe` runs one connection test on a throwaway instance and reports the
-  server identity, advertised tool names, duration, and whether the transport
-  closed. The live instance keeps running during a probe, and a disabled entry
-  can still be probed.
-- `Restart` disposes the live instance and mounts a fresh one with a new
-  reconnect budget. Use it when a server gave up reconnecting.
+**增删改配置** — 名称、传输方式（stdio / streamable-http）、启动命令、参数、环境变量、工作目录，或服务地址、请求头，以及启用开关和三个超时；保存带 revision 校验，并发修改会被拒绝并自动同步最新值，而不是直接覆盖。
 
-## Adding and editing servers
+**快速填表** — 粘贴 JSON 片段整表填充；粘贴整行命令自动拆成命令 + 参数；参数一行一个；`KEY=VALUE` 多行粘贴自动展开成多行；`${}` 按钮插入 `${credential:}` 凭据引用，光标落在花括号内。
 
-`Add server` opens the same editor a row's `Edit` button opens:
+## 安装
 
-- **Name** — the `servers` key and the `mcp__<name>__*` tool namespace. Letters,
-  digits, underscores or hyphens, up to 32 characters. A name cannot be changed
-  after creation.
-- **Transport** — `stdio` (command, arguments, environment, working directory)
-  or `streamable-http` (URL, request headers).
-- **Enabled** — a disabled entry keeps its configuration but starts no instance.
-- **Advanced** — startup, tool-call, and close timeouts in milliseconds; blank
-  fields inherit the manager and client defaults.
+### 方式一：直接从 GitHub 安装
 
-`Save` writes one path operation into the `mcp-manager` entry's `servers` map
-through the profile's configuration document, carrying the revision the page
-read. A concurrent change is refused instead of overwritten: the page reloads
-the latest values, keeps the draft, and asks to save again. The host's own
-validation message (missing command, cross-transport field, duplicate name,
-malformed token) is shown in the editor, and the form itself catches empty or
-duplicate key/value names and non-positive timeouts before saving. Values accept
-`${credential:NAME}` so a secret can live in the credential store instead of the
-configuration file.
+DeepSeek Harness 桌面版 → **设置 → 插件 → 「添加插件」** → 在「包名或地址」里填：
 
-`Delete` removes an entry the page itself wrote. When the entry also exists in a
-lower layer, the button reads `Restore inherited` and only drops the user-layer
-override, so the inherited server comes back.
+```
+github:DongHa0/dsh-mcp
+```
 
-### Filling the form quickly
+装完刷新页面（Ctrl + F5），再打开 **设置 → MCP**。
 
-- `Import JSON` accepts one server entry, an `mcpServers` block holding exactly
-  one server, or a `{ "name": entry }` pair. It fills the whole form, lists any
-  key it ignored, and `Undo` restores what the form held before the import.
-- `Split command line` beside Command takes something like
-  `npx -y @scope/server --flag "a b"` and fills Command plus one row per
-  argument. Quotes and escapes follow shell rules, and Windows paths such as
-  `"C:\nvm4w\nodejs\node.exe"` survive unchanged.
-- Arguments are one row each. Pasting several lines into a row adds them all;
-  `Paste list` accepts a JSON array, a whole command line, or one per line.
-- Environment variables and headers: paste `KEY=VALUE` lines or a JSON object
-  into any name field to expand several rows at once. `Hide`/`Show` masks
-  token-looking values, and `${}` inserts a `${credential:}` reference with the
-  caret placed inside the braces.
+> 这种方式装的是仓库默认分支的最新提交。更新时先在插件页移除、再重新添加。
+> 只有 npm 发布方式才有版本列表与一键更新，见 [PUBLISH.md](PUBLISH.md)。
 
-Servers registered by other plugins (they appear with the `Plugin` badge) are
-read-only here; the contributing plugin owns their lifetime.
+### 方式二：本地目录或压缩包
 
-## Notes
+把仓库（或解压后的目录）放到一个固定位置，添加插件时填该目录的**绝对路径**；也可以填打包好的 `.tgz` 文件路径。
 
-- The page reads the same settings document as the shipped configuration forms,
-  so a change made in either place shows up in both.
-- A read-only profile (`writable: false`) hides every write control and says so.
-- A removed entry can stay listed with `configured: false` while its cleanup is
-  pending or has failed; it disappears on the next successful cleanup or on host
-  restart.
-- Agent-preset or static `cordis.yml` MCP rows mounted outside the manager are
-  not listed; the manager only governs the global plane.
+目录位置此后不要移动或删除：插件按这个路径加载，移动后需要重新添加。
+
+## 使用
+
+### 状态怎么读
+
+- **绿色 · 已连接**：实例正常，后面显示工具数量与连接完成时间。
+- **黄色 · 连接中 / 重连中 / 等待凭据**：正在尝试；重连中会给出第几次尝试与下次重试时间，等待凭据通常是 `${credential:...}` 引用的凭据还没配置。
+- **灰色 · 已停用 / 已关闭**：条目保留但不启动实例，或实例已正常关闭。
+- **红色 · 失败**：附原因（加载失败 / 清理失败 / 重连次数耗尽 / 已断开 / 未确认关闭）。重连次数耗尽时用「重启」恢复。
+
+### 添加与编辑
+
+| 字段 | 说明 |
+|---|---|
+| 名称 | 同时是工具前缀 `mcp__名称__工具名`，限 1–32 位字母、数字、下划线、短横，创建后不可修改 |
+| 传输方式 | `stdio` 启动本机进程；`streamable-http` 连接远程地址 |
+| 命令 / 参数 / 环境变量 / 工作目录 | 仅 stdio；命令必填 |
+| 服务地址 / 请求头 | 仅 streamable-http；地址必填 |
+| 启用 | 关闭后保留配置，不启动实例 |
+| 启动 / 工具调用 / 关闭超时 | 毫秒，留空继承管理器与客户端默认值 |
+
+编辑继承来的条目会写入一层用户覆盖；「恢复继承」只删掉这层覆盖。
+
+### 删除
+
+删除需要二次确认。仅本页写入过的条目可删；若条目也存在于更下层配置，按钮会显示为「恢复继承」。
+
+### 只读的服务器
+
+由其他插件注册的服务器显示「插件注册」徽章，本页只读——它们的生命周期由注册它们的插件拥有。
+
+## 配置与安全
+
+- 保存的配置写入本机 profile 的 `cordis.patch.yml`（设置文档），并带 revision 冲突校验。
+- 环境变量与请求头的值在管理器里是普通字符串，会显示在页面上；建议用 `${credential:名称}` 引用凭据，不要把明文密钥贴进配置。
+- 插件不联网、不上传数据，只读取本机 `mcpManager` 的状态与设置文档。
+- 停用或卸载插件只移除这个页面，已有的 MCP 服务器配置不受影响。
+
+## 兼容与限制
+
+- 依据 DSH **0.2.x** 的接口编写：`settings.section` 槽位、`ctx.remote.mcpManager`、`ctx.remote.settings`、`configForms`。宿主大版本升级后需要复核这些接口。
+- 只治理 `mcp-manager` 条目这一全局层面；由 agent preset 或静态 `cordis.yml` 挂载的 MCP 实例不受其治理，本页也不会列出。
+- 管理器本身没有 MCP 的 OAuth 登录流程：需要浏览器授权的服务器会表现为普通连接失败与重连。
+- 浏览器端没有写入「插件注册」服务器的通道，这类条目只能查看。
+
+## 目录结构
+
+| 文件 | 作用 |
+|---|---|
+| `package.json` | 插件清单：`dsh.bundle.patch` 声明 bundle，`dsh.client` 声明浏览器半侧 |
+| `cordis.patch.yml` | 向宿主插入 `mcp-console` 这一行 |
+| `index.js` | Host 半侧（空实现，数据全部走 Remote） |
+| `client.js` | 浏览器半侧：设置页组件、状态订阅、探测/重启、配置表单与解析器 |
+| `locale/*.json` | 插件列表里的标题与说明（中英） |
+| `icon.svg` | 插件图标 |
+| `PUBLISH.md` | 维护者用：发布到 npm / 内网 registry 的步骤与更新机制说明 |
+
+## 开发与发布
+
+本机安装与仓库目录是 `link:` 关系：改完文件刷新页面即生效，提交并推送即完成分享。
+
+发布到 npm（或内网 registry）以获得一键更新能力的步骤、版本策略与 GitHub Actions 流水线见 [PUBLISH.md](PUBLISH.md)。
+
+## License
+
+[MIT](LICENSE)
