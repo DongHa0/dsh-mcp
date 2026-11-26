@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" role="img" aria-label="MCP console">
+  <g fill="none" stroke="#6f8ad6" stroke-width="1.7" stroke-linecap="round">
+    <path d="M18 18L18 8.2"/>
+    <path d="M18 18L9.4 24.8"/>
+    <path d="M18 18L26.6 24.8"/>
+  </g>
+  <circle cx="18" cy="18" r="3.6" fill="#3f63c8"/>
+  <circle cx="18" cy="18" r="6.4" fill="none" stroke="#3f63c8" stroke-width="1.5" opacity="0.45"/>
+  <circle cx="18" cy="7.4" r="2.5" fill="#6f8ad6"/>
+  <circle cx="8.6" cy="25.6" r="2.5" fill="#6f8ad6"/>
+  <circle cx="27.4" cy="25.6" r="2.5" fill="#6f8ad6"/>
+</svg>

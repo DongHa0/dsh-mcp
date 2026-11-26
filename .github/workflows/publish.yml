@@ -1,0 +1,36 @@
+name: publish
+
+# 打一个 v<package.json 的 version 标签并推送，即可自动发布到 npm。
+# 例如：npm version patch && git push --follow-tags
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Tag must match package.json version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "tag $GITHUB_REF_NAME does not match package version $VERSION" >&2
+            exit 1
+          fi
+
+      # 这个包没有依赖、没有构建步骤，因此不需要 npm install。
+      - name: Publish
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "MCP console",
+    "description": "Lists every MCP server this profile runs and edits them in place: connection status, tool counts, per-server Probe and Restart, plus add, edit, disable, and delete for configured entries. Open Settings → MCP. Writes go through the profile's configuration document with revision checks; values accept ${credential:NAME} references instead of plain secrets, and plugin-registered servers stay read-only."
+  }
+}
