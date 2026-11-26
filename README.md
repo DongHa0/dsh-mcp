@@ -4,6 +4,18 @@ A Settings page that shows every MCP server the current profile runs, updates
 itself as connection state changes, and edits the manager's `servers`
 configuration in place.
 
+## Install
+
+DeepSeek Harness desktop, **Settings → Plugins → Add plugin**, then enter one of:
+
+- `github:DongHa0/dsh-mcp` — installs the latest commit of this repository;
+- the absolute path of a checked-out copy of this folder;
+- the absolute path of a packed `.tgz`.
+
+Refresh the page afterwards, then open **Settings → MCP**. A GitHub install is
+updated by removing and adding it again; an `npm` install gets a version list and
+one-click updates (see [PUBLISH.md](PUBLISH.md)).
+
 ## Where it is
 
 Open **Settings → MCP** (the sidebar's gear icon). The page renders inside the
